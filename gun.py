@@ -15,6 +15,7 @@ font = pygame.font.Font(None, 20)
 textpos_kills_count = (10, 10)
 textpos_shoots_count = (400, 300)
 textpos_current_bullet_type = (10, 20)
+textpos_control = (100, 10)
 
 
 class GameObject:
@@ -147,6 +148,7 @@ class Gun(GameObject):
         self.gun_move_left = False
         self.gun_move_right = False
         self.cursor_on_the_left = False
+
     def fire2_start(self):
         self.f2_on = 1
 
@@ -224,8 +226,6 @@ class Gun(GameObject):
             self.x += 12
 
 
-
-
 class Target(GameObject):
     def __init__(self):
         self.screen = screen
@@ -266,7 +266,6 @@ class Target(GameObject):
         global bombs
         new_bomb = Bomb(self.x, self.y, self.vx)
         bombs.append(new_bomb)
-
 
 
 class AngryTarget(Target):
@@ -318,6 +317,7 @@ class Bomb(GameObject):
         else:
             return False
 
+
 def choose_target():
     """ Случайный выбор типа мишени"""
     random_number = randint(1, 3)
@@ -345,10 +345,8 @@ def action_checker():
     elif event.type == pygame.KEYDOWN:
         if event.key == pygame.K_z:
             gun.switch_bullet_type('z')
-            print('z')
         elif event.key == pygame.K_x:
             gun.switch_bullet_type('x')
-            print('x')
         elif event.key == pygame.K_c:
             gun.switch_bullet_type('c')
         elif event.key == pygame.K_a:
@@ -360,9 +358,6 @@ def action_checker():
             gun.gun_move_left = False
         elif event.key == pygame.K_d:
             gun.gun_move_right = False
-
-
-
 
 
 pygame.init()
@@ -385,6 +380,8 @@ while not finished:
     screen.blit(kills_count, textpos_kills_count)
     current_bullet_type = font.render(f"Current bullet type: {gun.current_bullet_type}", True, [0, 123, 0])
     screen.blit(current_bullet_type, textpos_current_bullet_type)
+    controls = font.render('Press X,Y,Z to switch type of bullet. A - move left. D - move right', True, [0, 123, 0])
+    screen.blit(controls, textpos_control)
     gun.draw()
     gun.move()
     for target in targets:
@@ -405,7 +402,7 @@ while not finished:
         if bullet.check_delete():
             bullets.remove(bullet)
         for target in targets:
-            if bullets:
+            if bullet in bullets:
                 if bullet.hittest(target):
                     bullets.remove(bullet)
                     if type(bullet) == Bullet and type(target) == Target\
@@ -415,15 +412,16 @@ while not finished:
                         targets.remove(target)
                         targets.append(choose_target())
         for bomb in bombs:
-            if bullets:
+            if bullet in bullets:
                 if bullet.hittest(bomb):
                     bullets.remove(bullet)
                     bombs.remove(bomb)
     if bombs:
         for bomb in bombs:
-            bomb.move()
-            if not bomb.check_delete():
-                bombs.remove(bomb)
+            if bombs:
+                bomb.move()
+                if not bomb.check_delete():
+                    bombs.remove(bomb)
     gun.power_up()
 
 pygame.quit()
